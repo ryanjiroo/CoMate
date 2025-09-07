@@ -24,7 +24,7 @@ const FiturUtama = () => {
         <section className="py-16 bg-[#F4F7F7] font-[Poppins]">
             <div className="container mx-auto px-4 text-center">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#26667F] mb-4 font-[Outfit]">
-                    Apa yang Membuat Kami Berbeda?
+                    Fitur Kami
                 </h2>
                 <hr
                     className="w-20 sm:w-[89px] h-[4px] sm:h-[5px] mx-auto mt-4 mb-4 border-none rounded-full"
