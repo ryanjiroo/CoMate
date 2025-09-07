@@ -10,16 +10,16 @@ const Welcome = () => {
             {/* Konten Utama */}
             <div className="relative z-10 flex flex-col flex-grow items-center justify-center w-full">
                 <main className="flex-grow flex items-center justify-center w-full p-6 sm:p-10">
-                    <div className="w-11/12 md:w-4/5 min-h-[700px] lg:min-h-[800px] rounded-3xl relative overflow-hidden bg-gradient-to-br from-[#26667F] to-[#67C090] text-[#DDF4E7]">
+                    <div className="w-11/12 md:w-5/5 min-h-[900px] lg:min-h-[1000px] rounded-3xl relative overflow-hidden bg-gradient-to-br from-[#26667F] to-[#67C090] text-[#DDF4E7]">
                         
                         {/* Garis abstrak di dalam card */}
                         <img
                             src="/garisabstrak.svg"
                             alt="Abstract lines"
-                            className="absolute left-164 top-0 w-[60%] h-full object-cover opacity-60"
+                            className="absolute left-184 top-0 w-[60%] h-full object-cover opacity-60"
                         />
 
-                        <div className="relative z-10 flex flex-col mt-20 md:flex-row items-center justify-center gap-10 p-6 md:p-16 lg:p-20">
+                        <div className="relative z-10 flex flex-col md:ml-20 mt-28 md:flex-row items-center justify-center gap-10 p-6 md:p-16 lg:p-20">
                             {/* Text Content Section */}
                             <div className="flex flex-col text-left md:w-1/2">
                                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-[Outfit] mb-4 leading-tight text-center md:text-left">
