@@ -12,7 +12,7 @@ const Navbar = () => {
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center space-x-6">
                     <a href="#" className="hover:text-[#67C090] transition-colors duration-200">Home</a>
-                    <a href="#" className="hover:text-[#67C090] transition-colors duration-200">About Us</a>
+                    <a href="#" className="hover:text-[#67C090] transition-colors duration-200">Our Feature</a>
                     <button className="bg-gradient-to-br from-[#26667F] to-[#67C090] text-[#F4F7F7] font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 hover:bg-opacity-90">
                         Sign In
                     </button>
