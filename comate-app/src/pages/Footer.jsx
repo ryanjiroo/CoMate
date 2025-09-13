@@ -1,4 +1,6 @@
+// Footer.jsx
 import React from 'react';
+import { Link } from 'react-scroll'; // Tambahkan ini
 
 const Footer = () => {
     return (
@@ -30,8 +32,8 @@ const Footer = () => {
                     {/* Navigator Section */}
                     <div className="flex flex-col items-center md:items-start mb-8 md:mb-0">
                         <h3 className="text-lg sm:text-xl font-bold font-[Outfit] mb-4">Navigator</h3>
-                        <a href="#" className="text-base sm:text-lg hover:text-opacity-80 transition-all mb-2">Home</a>
-                        <a href="#" className="text-base sm:text-lg hover:text-opacity-80 transition-all mb-2">Our Feature</a>
+                        <Link to="welcome" smooth={true} duration={500} className="text-base sm:text-lg hover:text-opacity-80 transition-all mb-2 cursor-pointer">Home</Link>
+                        <Link to="fitur-utama" smooth={true} duration={500} offset={-80} className="text-base sm:text-lg hover:text-opacity-80 transition-all mb-2 cursor-pointer">Our Feature</Link>
                         <button
                             className="mt-4 px-6 py-2 rounded-full text-[#DDF4E7] font-semibold text-sm sm:text-base"
                             style={{ background: 'linear-gradient(to right, #67C090, #26667F)' }}
