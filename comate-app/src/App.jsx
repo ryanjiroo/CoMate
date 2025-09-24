@@ -8,6 +8,8 @@ import ToDoList from './pages/ToDoList';
 import Chatbot from './pages/Chatbot';
 import Dashboard from './layouts/DashboardLayout';
 
+const API_URL = 'https://comate-backend.vercel.app/api';
+
 function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -16,18 +18,26 @@ function App() {
   const [currentPage, setCurrentPage] = useState('todos');
   const [user, setUser] = useState(null);
 
-  // Efek untuk memeriksa token saat aplikasi dimuat
+  const fetchCurrentUser = async (userToken) => {
+    try {
+      const res = await fetch(`${API_URL}/users/current`, {
+        headers: { 'Authorization': `Bearer ${userToken}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setUser(data.data);
+    } catch (error) {
+      console.error('Failed to fetch user data', error);
+      handleLogout();
+    }
+  };
+
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
       setIsLoggedIn(true);
-      // Simulasikan pengambilan data pengguna setelah token ditemukan
-      // Dalam aplikasi nyata, Anda akan melakukan panggilan API di sini
-      setUser({
-        username: 'User', 
-        email: 'user@example.com',
-      });
+      fetchCurrentUser(storedToken);
     }
   }, []);
 
@@ -45,16 +55,12 @@ function App() {
     setIsLoginModalOpen(false);
     setIsRegisterModalOpen(false);
   };
-  
+
   const handleLoginSuccess = (userToken) => {
     localStorage.setItem('token', userToken);
     setToken(userToken);
     setIsLoggedIn(true);
-    // Set data pengguna setelah login berhasil
-    setUser({
-      username: 'User',
-      email: 'user@example.com',
-    });
+    fetchCurrentUser(userToken);
     handleCloseModals();
   };
 
@@ -75,18 +81,18 @@ function App() {
   if (isLoggedIn || token) {
     const renderPage = () => {
       if (currentPage === 'todos') {
-        return <ToDoList />;
+        return <ToDoList token={token} />;
       } else if (currentPage === 'chatbot') {
-        return <Chatbot />;
+        return <Chatbot token={token} />;
       }
     };
-    
+
     return (
       <Dashboard
         onLogout={handleLogout}
         onPageChange={handlePageChange}
         currentPage={currentPage}
-        user={user} // Pastikan prop user diteruskan
+        user={user}
       >
         {renderPage()}
       </Dashboard>
@@ -98,7 +104,7 @@ function App() {
       <Welcome onSignInClick={handleOpenLogin} />
       <FiturUtama />
       <Footer />
-      
+
       <Login
         isOpen={isLoginModalOpen}
         onClose={handleCloseModals}
