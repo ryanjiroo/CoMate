@@ -1,12 +1,40 @@
-# React + Vite
+# 🌟 Comate App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Comate App adalah aplikasi web modern berbasis **React** dengan **Vite** sebagai build tool yang dikombinasikan dengan **Tailwind CSS** untuk styling.  
+Project ini dirancang untuk memberikan performa cepat, tampilan responsif, dan pengalaman pengembangan yang efisien.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
+- **React 19 + Vite 7** untuk pengembangan cepat dan hot-reload.  
+- **Tailwind CSS 4** dengan plugin typography untuk styling yang fleksibel.  
+- **Framer Motion** untuk animasi interaktif.  
+- **Lucide React** & **React Icons** untuk ikon yang ringan dan elegan.  
+- **Marked** untuk parsing Markdown.  
+- **Dicebear** untuk pembuatan avatar otomatis.  
+- Smooth scrolling dengan **React Scroll**.  
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 📦 Tech Stack
+- **Frontend**: React, Vite, Tailwind CSS  
+- **Styling**: Tailwind Typography, Framer Motion  
+- **Icons & Avatar**: Lucide React, React Icons, Dicebear  
+
+---
+
+## 🛠️ Installation
+
+Pastikan sudah menginstall **Node.js** (versi terbaru disarankan).  
+Clone repository, lalu jalankan perintah berikut:
+
+```bash
+# Clone repository
+git clone https://github.com/username/comate-app.git
+cd comate-app
+
+# Install dependencies
+npm install
+
+# Jalankan mode development
+npm run dev
