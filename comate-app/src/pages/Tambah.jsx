@@ -15,9 +15,10 @@ const fromDateTimeLocal = (datetimeLocalString) => {
     return `${datetimeLocalString}:00.000+07:00`;
 };
 
-const Tambah = ({ isOpen, onClose, token, initialData }) => {
+const Tambah = ({ isOpen, onClose, token, initialData, allTasks, onSave }) => {
     const [formData, setFormData] = useState({
         title: '',
+        taskId: '',
         description: '',
         status: 'To Do',
         startDate: '',
@@ -31,6 +32,7 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
         if (initialData) {
             setFormData({
                 title: initialData.title || '',
+                taskId: initialData.taskId || 'none',
                 description: initialData.description || '',
                 status: initialData.status || 'To Do',
                 startDate: toLocalISOString(initialData.startDate) || '',
@@ -41,6 +43,7 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
         } else {
             setFormData({
                 title: '',
+                taskId: 'none',
                 description: '',
                 status: 'To Do',
                 startDate: '',
@@ -67,8 +70,9 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
         e.preventDefault();
         setIsLoading(true);
 
-        const todoData = {
+        const payload = {
             title: formData.title,
+            taskId: formData.taskId === 'none' ? null : formData.taskId,
             description: formData.description,
             status: formData.status,
             location: formData.location,
@@ -78,29 +82,10 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
         };
 
         const method = initialData ? 'PUT' : 'POST';
-        const url = initialData ? `${API_URL}/todo/${initialData._id}` : `${API_URL}/todo`;
+        const url = initialData ? `/todo/${initialData._id}` : `/todo`;
 
-        try {
-            const res = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(todoData)
-            });
-
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.message || 'Failed to save todo.');
-            }
-
-            onClose();
-        } catch (err) {
-            alert(`Failed to save todo: ${err.message}`);
-        } finally {
-            setIsLoading(false);
-        }
+        await onSave(payload, method, url);
+        setIsLoading(false);
     };
 
     const isDateDisabled = !!initialData?.googleCalendarId;
@@ -108,7 +93,6 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
     return (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
-                {/* Modal Header */}
                 <div className="flex justify-between items-center p-6 border-b border-gray-200">
                     <h2 className="text-xl font-bold text-gray-800">{initialData ? 'Edit Todo' : 'Add New Todo'}</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -116,9 +100,7 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
                     </button>
                 </div>
 
-                {/* Modal Body (Form) */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    {/* Title */}
                     <div>
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                             Title <span className="text-red-500">*</span>
@@ -133,8 +115,24 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
                             required
                         />
                     </div>
+                    <div>
+                        <label htmlFor="taskId" className="block text-sm font-medium text-gray-700 mb-1">
+                            Group Task <span className="text-gray-400">(Optional)</span>
+                        </label>
+                        <select
+                            id="taskId"
+                            name="taskId"
+                            value={formData.taskId}
+                            onChange={handleInputChange}
+                            className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#124170] focus:border-[#124170]"
+                        >
+                            <option value="none">-- No Task --</option>
+                            {allTasks.map(task => (
+                                <option key={task._id} value={task._id}>{task.title}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                    {/* Description */}
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                             Description <span className="text-gray-400">(Optional)</span>
@@ -149,7 +147,6 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
                         ></textarea>
                     </div>
 
-                    {/* Status */}
                     <div>
                         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
                             Status <span className="text-red-500">*</span>
@@ -163,16 +160,14 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
                             required
                         >
                             <option value="To Do">To Do</option>
-                            <option value="In Progress">In Progress</option>
+                            <option value="Pending">Pending</option>
                             <option value="Done">Done</option>
                         </select>
                     </div>
 
-                    {/* Google Calendar Section */}
                     <div className="space-y-4 pt-4">
                         <h3 className="text-sm font-medium text-gray-700">Google Calendar <span className="text-gray-400">(Optional)</span></h3>
                         <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-                            {/* Start Date */}
                             <div className="flex-1">
                                 <label htmlFor="startDate" className="sr-only">Start Date</label>
                                 <input
@@ -185,7 +180,6 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
                                     disabled={isDateDisabled}
                                 />
                             </div>
-                            {/* End Date */}
                             <div className="flex-1">
                                 <label htmlFor="endDate" className="sr-only">End Date</label>
                                 <input
@@ -199,8 +193,6 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
                                 />
                             </div>
                         </div>
-
-                        {/* Location */}
                         <div>
                             <label htmlFor="location" className="sr-only">Location</label>
                             <input
@@ -213,8 +205,6 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
                                 className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#124170] focus:border-[#124170]"
                             />
                         </div>
-
-                        {/* Invite Attendee */}
                         <div>
                             <label htmlFor="attendeeEmail" className="sr-only">Invite Attendee (Email)</label>
                             <input
@@ -228,8 +218,6 @@ const Tambah = ({ isOpen, onClose, token, initialData }) => {
                             />
                         </div>
                     </div>
-
-                    {/* Save Button */}
                     <div className="flex justify-end pt-4 border-t border-gray-200">
                         <button
                             type="submit"
