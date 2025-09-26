@@ -23,18 +23,22 @@ Project ini dirancang untuk memberikan performa cepat, tampilan responsif, dan p
 
 ---
 
-## 🛠️ Installation
+## 🛠️ Cara Mengakses Aplikasi
+1. Kunjungi [https://co-mate.vercel.app/](https://co-mate.vercel.app/)  
+2. **Register** akun baru  
+3. **Login** ke dalam aplikasi  
+4. Tambah **todo list** sesuai kebutuhan  
+5. Atur **todo list** agar lebih terorganisir  
+6. Tanya **chatbot** untuk membantu mengelola tugas  
+7. Aktifkan **premium** untuk membuka fitur recommender  
+8. Buka **recommender** untuk mendapatkan rekomendasi dan manajemen tugas yang lebih baik  
 
-Pastikan sudah menginstall **Node.js** (versi terbaru disarankan).  
-Clone repository, lalu jalankan perintah berikut:
+---
 
-```bash
-# Clone repository
-git clone https://github.com/username/comate-app.git
-cd comate-app
-
-# Install dependencies
-npm install
-
-# Jalankan mode development
-npm run dev
+## ⚙️ Scripts
+| Command          | Deskripsi                                 |
+|------------------|--------------------------------------------|
+| `npm run dev`    | Menjalankan server development Vite        |
+| `npm run build`  | Build aplikasi untuk production            |
+| `npm run preview`| Preview hasil build                        |
+| `npm run lint`   | Menjalankan ESLint untuk pengecekan kode   |
