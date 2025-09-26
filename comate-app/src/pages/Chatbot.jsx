@@ -7,7 +7,12 @@ const API_URL = 'https://comate-backend.vercel.app/api';
 const Chatbot = ({ token }) => {
     const [messages, setMessages] = useState(() => {
         const storedMessages = sessionStorage.getItem('chatMessages');
-        return storedMessages ? JSON.parse(storedMessages) : [{ text: "Halo, saya **CoMate AI** yang didukung oleh Llama. Ada yang bisa saya bantu?", sender: 'bot' }];
+        // Inisialisasi pesan dengan konten bot yang sudah diparse jika belum ada
+        if (storedMessages) {
+            return JSON.parse(storedMessages);
+        } else {
+            return [{ text: marked.parse("Halo, saya **CoMate AI** yang didukung oleh Llama. Ada yang bisa saya bantu?"), sender: 'bot', isHtml: true }];
+        }
     });
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +68,7 @@ const Chatbot = ({ token }) => {
             setMessages(prevMessages => [...prevMessages, botResponse]);
         } catch (err) {
             const errorMsg = `Error: ${err.message}`;
-            setMessages(prevMessages => [...prevMessages, { text: errorMsg, sender: 'bot' }]);
+            setMessages(prevMessages => [...prevMessages, { text: errorMsg, sender: 'bot', isHtml: false }]);
         } finally {
             setIsLoading(false);
         }
@@ -89,8 +94,9 @@ const Chatbot = ({ token }) => {
                             className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-xl shadow-md ${msg.sender === 'user' ? 'bg-[#DDF4E7] text-[#124170]' : 'bg-gray-100 text-gray-800'
                                 }`}
                         >
+                            {/* KUNCI: Tambahkan class 'prose prose-sm' jika konten adalah HTML dari bot */}
                             {msg.isHtml ? (
-                                <div dangerouslySetInnerHTML={{ __html: msg.text }} />
+                                <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: msg.text }} />
                             ) : (
                                 msg.text
                             )}
