@@ -7,7 +7,6 @@ const API_URL = 'https://comate-backend.vercel.app/api';
 const Chatbot = ({ token }) => {
     const [messages, setMessages] = useState(() => {
         const storedMessages = sessionStorage.getItem('chatMessages');
-        // Inisialisasi pesan dengan konten bot yang sudah diparse jika belum ada
         if (storedMessages) {
             return JSON.parse(storedMessages);
         } else {
@@ -91,10 +90,13 @@ const Chatbot = ({ token }) => {
                 {messages.map((msg, index) => (
                     <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
                         <div
-                            className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-xl shadow-md ${msg.sender === 'user' ? 'bg-[#DDF4E7] text-[#124170]' : 'bg-gray-100 text-gray-800'
-                                }`}
+                            // --- PERUBAHAN UI: Kontras bubble & padding ---
+                            className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-xl shadow-md text-base ${
+                                msg.sender === 'user' 
+                                ? 'bg-[#124170] text-white' 
+                                : 'bg-white text-gray-800'
+                            }`}
                         >
-                            {/* KUNCI: Tambahkan class 'prose prose-sm' jika konten adalah HTML dari bot */}
                             {msg.isHtml ? (
                                 <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: msg.text }} />
                             ) : (
@@ -105,7 +107,7 @@ const Chatbot = ({ token }) => {
                 ))}
                 {isLoading && (
                     <div className="flex justify-start mb-4">
-                        <div className="max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-xl shadow-md bg-gray-100 text-gray-800">
+                        <div className="max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-xl shadow-md bg-white text-gray-800">
                             <span className="animate-pulse">Typing...</span>
                         </div>
                     </div>
@@ -114,12 +116,13 @@ const Chatbot = ({ token }) => {
             </div>
 
             {/* Chat Input Area */}
-            <form onSubmit={handleSendMessage} className="flex p-4 bg-white rounded-xl shadow-lg">
+            {/* --- PERUBAHAN UI: Form lebih besar & modern --- */}
+            <form onSubmit={handleSendMessage} className="flex p-2 bg-white rounded-xl shadow-lg items-center gap-2">
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className="flex-1 border border-gray-300 rounded-full px-4 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-[#124170]"
+                    className="flex-1 bg-gray-100 rounded-full border-2 border-transparent px-6 py-3 text-base focus:outline-none focus:border-[#124170] focus:bg-white focus:ring-0 transition-all"
                     placeholder="Ketik pesan..."
                     disabled={isLoading}
                 />
