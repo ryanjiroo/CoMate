@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { BiPlus, BiPencil, BiTrash } from "react-icons/bi";
+import { BiPlus, BiPencil, BiTrash, BiChat } from "react-icons/bi";
 import Tambah from "./Tambah";
 import GroupTask from "./GroupTask";
 
 const API_URL = 'https://comate-backend.vercel.app/api';
-
-// --- FUNGSI BANTUAN UNTUK PERHITUNGAN MINGGUAN ---
 
 const getWeeklyRange = () => {
     const now = new Date();
@@ -36,7 +34,6 @@ const getProgressStats = (todos) => {
     
     const progress = totalWeekly > 0 ? Math.round((doneWeekly / totalWeekly) * 100) : 0;
     
-    // Logika Warna Progress: Merah < 30%, Kuning < 70%, Hijau >= 70%
     let progressColorClass = '';
     if (progress < 30) {
         progressColorClass = 'bg-red-500'; // Merah
@@ -67,7 +64,6 @@ const calculateDensity = (todos) => {
     let densityText = '';
     let densityColor = '';
     
-    // Logika Kepadatan: < 3 (Santai/Hijau), 3-4 (Sedang/Kuning), >= 5 (Sibuk/Merah)
     if (activeWeeklyTodosCount < 3) {
         densityText = 'Santai';
         densityColor = 'bg-green-500'; 
@@ -87,7 +83,8 @@ const calculateDensity = (todos) => {
 
 // --- KOMPONEN UTAMA ---
 
-const ToDoList = ({ token, isPremium, onShowPremiumModal }) => {
+// Tambahkan prop onViewTaskDetails
+const ToDoList = ({ token, isPremium, onShowPremiumModal, onViewTaskDetails }) => {
     const [allTodos, setAllTodos] = useState([]);
     const [allTasks, setAllTasks] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,7 +93,7 @@ const ToDoList = ({ token, isPremium, onShowPremiumModal }) => {
     const [editingTask, setEditingTask] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     
-    const { progress, totalWeekly, progressColorClass } = getProgressStats(allTodos); // Ambil progressColorClass baru
+    const { progress, totalWeekly, progressColorClass } = getProgressStats(allTodos);
     const { densityScore, densityText, densityColor } = calculateDensity(allTodos);
 
     const apiCall = async (endpoint, method = 'GET', body = null) => {
@@ -272,20 +269,15 @@ const ToDoList = ({ token, isPremium, onShowPremiumModal }) => {
         const url = `/todo/${todoId}/move/${newTaskId || 'none'}`; 
         
         try {
-            // Pembaruan UI Optimistis
             setAllTodos(prevTodos => prevTodos.map(todo => 
                 todo._id === todoId ? { ...todo, taskId: newTaskId || null } : todo
             ));
-
-            // Panggilan API di background
             await apiCall(url, 'PUT');
-
         } catch (err) {
             alert(err.message || 'Failed to move todo. Reverting changes.');
             fetchAllData(); 
         }
     };
-    // --- AKHIR LOGIKA DRAG & DROP ---
     
     const formatDisplayDate = (dateString) => {
         if (!dateString) return '';
@@ -368,23 +360,20 @@ const ToDoList = ({ token, isPremium, onShowPremiumModal }) => {
                 </div>
             </div>
 
+            {/* Bagian Progress & Kepadatan (tidak berubah) */}
             <div className="flex space-x-6 mb-8">
-                {/* --- PROGRESS MINGGU INI --- */}
                 <div className="bg-white p-6 rounded-2xl shadow-lg flex-1">
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Progress Minggu Ini</h3>
                     <p className="text-sm text-gray-500 mb-3">
                         {totalWeekly > 0 ? `${totalWeekly} tugas terjadwal minggu ini.` : 'Tidak ada tugas terjadwal minggu ini.'}
                     </p>
                     <div className="w-full bg-gray-200 rounded-full h-4 relative overflow-hidden">
-                        {/* Menerapkan progressColorClass baru */}
                         <div className={`${progressColorClass} h-4 rounded-full transition-all duration-500`} style={{ width: `${progress}%` }}></div>
                         <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xs font-bold text-white">
                             {progress}%
                         </span>
                     </div>
                 </div>
-                
-                {/* --- KEPADATAN MINGGU INI --- */}
                 <div className="bg-white p-6 rounded-2xl shadow-lg flex-1">
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Kepadatan ({densityText})</h3>
                     <p className="text-sm text-gray-500 mb-3">
@@ -399,6 +388,7 @@ const ToDoList = ({ token, isPremium, onShowPremiumModal }) => {
                 </div>
             </div>
 
+            {/* Bagian Daftar Tugas */}
             <div className="bg-white p-8 rounded-2xl shadow-lg">
                 <h3 className="text-xl font-bold text-gray-800 mb-6">Daftar Tugas</h3>
                 {isLoading ? (
@@ -408,21 +398,36 @@ const ToDoList = ({ token, isPremium, onShowPremiumModal }) => {
                 ) : (
                     <>
                         {allTasks.map(task => (
-                            // Wrapper untuk Task Group (Target Drop)
                             <div 
                                 key={task._id} 
                                 className="mb-8 p-4 border border-transparent transition-all rounded-xl"
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, task._id)} // Drop ke Task ID
+                                onDrop={(e) => handleDrop(e, task._id)}
                             >
                                 <div className="flex justify-between items-center mb-4">
                                     <h4 className="text-lg font-bold text-gray-800">{task.title}</h4>
                                     <div className="space-x-2">
-                                        <button onClick={() => openGroupModal(task)} className="text-gray-500 hover:text-gray-700 transition-colors">
+                                        {/* --- PERUBAHAN DI SINI --- */}
+                                        <button 
+                                            onClick={() => onViewTaskDetails(task._id)} 
+                                            className="text-gray-500 hover:text-gray-700 transition-colors"
+                                            title="View Details & Comments"
+                                        >
+                                            <BiChat />
+                                        </button>
+                                        <button 
+                                            onClick={() => openGroupModal(task)} 
+                                            className="text-gray-500 hover:text-gray-700 transition-colors"
+                                            title="Edit Task Title"
+                                        >
                                             <BiPencil />
                                         </button>
-                                        <button onClick={() => handleDeleteTask(task._id)} className="text-red-500 hover:text-red-700 transition-colors">
+                                        <button 
+                                            onClick={() => handleDeleteTask(task._id)} 
+                                            className="text-red-500 hover:text-red-700 transition-colors"
+                                            title="Delete Task"
+                                        >
                                             <BiTrash />
                                         </button>
                                     </div>
@@ -444,12 +449,11 @@ const ToDoList = ({ token, isPremium, onShowPremiumModal }) => {
                             </div>
                         ))}
                         {uncategorizedTodos.length > 0 && (
-                            // Wrapper untuk Uncategorized Todos (Target Drop: null/none)
                             <div 
                                 className="mt-6 p-4 border border-transparent transition-all rounded-xl"
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, null)} // Drop ke NULL (Uncategorized)
+                                onDrop={(e) => handleDrop(e, null)}
                             >
                                 <h4 className="text-xl font-bold text-gray-800 mb-4">Other Todos</h4>
                                 <table className="w-full text-left table-auto">
