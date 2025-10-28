@@ -9,6 +9,10 @@ import Chatbot from './pages/Chatbot';
 import Recommender from './pages/Recommender'; 
 import Dashboard from './layouts/DashboardLayout';
 
+// Impor baru yang diperlukan
+import DetailGroupTask from './pages/DetailGroupTask'; 
+import PremiumModal from './pages/PremiumModal';
+
 const API_URL = 'https://comate-backend.vercel.app/api';
 
 function App() {
@@ -18,7 +22,14 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [currentPage, setCurrentPage] = useState('todos');
   const [user, setUser] = useState(null);
-  const [allTodos, setAllTodos] = useState([]); // <-- TAMBAH STATE UNTUK TODOS
+  const [allTodos, setAllTodos] = useState([]);
+
+  // --- State Baru untuk Navigasi Detail ---
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+  // --- State Baru untuk Modal Premium (dibutuhkan oleh DetailGroupTask) ---
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [premiumModalMessage, setPremiumModalMessage] = useState("");
 
   const apiCall = async (endpoint, method = 'GET', body = null) => {
     const options = {
@@ -89,10 +100,8 @@ function App() {
     }
   }, []);
 
-  // Efek untuk memuat data setelah login berhasil atau token tersedia
   useEffect(() => {
     if (token) {
-        // Hanya memuat todos jika sudah login untuk menghindari error API
         fetchTodos(); 
     }
   }, [token]);
@@ -128,37 +137,104 @@ function App() {
     setToken(null);
     setIsLoggedIn(false);
     setUser(null);
-    setAllTodos([]); // Hapus todos saat logout
+    setAllTodos([]); 
+    setCurrentPage('todos'); // Reset ke halaman todos
+    setSelectedTaskId(null); // Reset task ID
   };
 
   const handlePageChange = (pageName) => {
     setCurrentPage(pageName);
+    setSelectedTaskId(null); // Reset ID saat ganti halaman via sidebar
+  };
+
+  // --- Handler Baru untuk Navigasi ---
+  const handleViewTaskDetails = (taskId) => {
+    setSelectedTaskId(taskId);
+    setCurrentPage('task-detail');
+  };
+
+  const handleBackToTodos = () => {
+    setSelectedTaskId(null);
+    setCurrentPage('todos');
+  };
+
+  // --- Handler Baru untuk Modal Premium ---
+  const handleShowPremiumModal = (message) => {
+    setPremiumModalMessage(message);
+    setIsPremiumModalOpen(true);
+  };
+
+  const handleNavigateToProfile = () => {
+    // Fungsi ini dipanggil dari DetailGroupTask
+    // Kita tidak bisa membuka modal EditProfile di DashboardLayout dari sini
+    // Jadi kita hanya menutup modal premium. Pengguna bisa klik Edit Profile manual.
+    setIsPremiumModalOpen(false);
+    // Jika ingin, kita bisa Arahkan ke halaman profile JIKA itu halaman,
+    // tapi karena itu modal, kita biarkan saja.
   };
 
   if (isLoggedIn || token) {
     const renderPage = () => {
-      if (currentPage === 'todos') {
-        // Perluas ToDoList jika ia juga perlu tahu kapan harus me-refresh data
-        return <ToDoList token={token} onDataChange={fetchTodos} />; 
-      } else if (currentPage === 'chatbot') {
-        return <Chatbot token={token} />;
-      } else if (currentPage === 'ai-recommendation') { // <-- TAMBAH HALAMAN RECOMMENDER
-        return <Recommender apiCall={apiCall} allTodos={allTodos} />;
+      switch (currentPage) {
+        case 'todos':
+          return (
+            <ToDoList
+              token={token}
+              isPremium={user?.isPremium}
+              onShowPremiumModal={handleShowPremiumModal}
+              onDataChange={fetchTodos}
+              // Kirim handler agar ToDoList bisa memanggilnya
+              onViewTaskDetails={handleViewTaskDetails}
+            />
+          );
+        case 'chatbot':
+          return <Chatbot token={token} />;
+        case 'ai-recommendation':
+          return <Recommender apiCall={apiCall} allTodos={allTodos} />;
+        
+        // --- Case Baru untuk Halaman Detail ---
+        case 'task-detail':
+          return (
+            <DetailGroupTask
+              token={token}
+              user={user}
+              isPremium={user?.isPremium}
+              taskId={selectedTaskId} // Kirim ID yang dipilih
+              onBackToTodos={handleBackToTodos} // Kirim handler untuk kembali
+              onShowPremiumModal={handleShowPremiumModal}
+              onNavigateToProfile={handleNavigateToProfile}
+            />
+          );
+        default:
+          // Halaman default jika terjadi error
+          return <ToDoList token={token} onDataChange={fetchTodos} onViewTaskDetails={handleViewTaskDetails} />;
       }
-      return <div>Select a menu item.</div>;
     };
 
     return (
-      <Dashboard
-        onLogout={handleLogout}
-        onPageChange={handlePageChange}
-        currentPage={currentPage}
-        user={user}
-        onUpdateProfile={handleUpdateProfile}
-        onSubscribe={handleSubscribe}
-      >
-        {renderPage()}
-      </Dashboard>
+      <>
+        <Dashboard
+          onLogout={handleLogout}
+          onPageChange={handlePageChange}
+          currentPage={currentPage}
+          user={user}
+          onUpdateProfile={handleUpdateProfile}
+          onSubscribe={handleSubscribe}
+          // Kirim handler modal ke Dashboard juga
+          onShowPremiumModal={handleShowPremiumModal} 
+        >
+          {renderPage()}
+        </Dashboard>
+        
+        {/* Render Modal Premium di level atas */}
+        <PremiumModal
+          isOpen={isPremiumModalOpen}
+          onClose={() => setIsPremiumModalOpen(false)}
+          message={premiumModalMessage}
+          // (Asumsi komponen PremiumModal Anda tidak butuh onNavigateToProfile)
+          // Jika butuh, tambahkan: onNavigateToProfile={handleNavigateToProfile}
+        />
+      </>
     );
   }
 
